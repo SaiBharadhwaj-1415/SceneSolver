@@ -1,0 +1,45 @@
+# === Backend (FastAPI/Python) ===
+Backend/venv/
+Backend/__pycache__/
+Backend/.env
+Backend/*.pyc
+Backend/*.pyo
+Backend/*.pyd
+Backend/temp_*/
+Backend/temp_vit_model/
+
+# Never commit native libs from site-packages
+Backend/**/*.dll
+Backend/**/*.lib
+Backend/**/*.pyd
+Backend/**/*.so
+Backend/**/*.dylib
+
+# Optional: ignore local model weights if they ever get large
+# Backend/**/*.pt
+# Backend/**/*.safetensors
+
+# === Frontend (React/Node) ===
+Frontend/node_modules/
+Frontend/build/
+Frontend/dist/
+Frontend/.pnp
+Frontend/.pnp.js
+Frontend/coverage/
+
+# Env files
+Frontend/.env
+Frontend/.env.local
+Frontend/.env.*.local
+
+# Logs
+Frontend/npm-debug.log*
+Frontend/yarn-debug.log*
+Frontend/yarn-error.log*
+
+# === Editors & OS ===
+.vscode/
+.idea/
+*.log
+.DS_Store
+Thumbs.db
