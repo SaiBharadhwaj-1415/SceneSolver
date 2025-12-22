@@ -7,7 +7,7 @@ from datetime import datetime
 import re
 import logging
 from bson import ObjectId
-from datetime import timezone,datetime, timedelta
+from datetime import timezone, datetime, timedelta
 import random
 import bcrypt
 import uuid
@@ -18,8 +18,8 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from ultralytics import YOLO
-from transformers import ViTForImageClassification, ViTImageProcessor, GPT2LMHeadModel
-from PIL import Image, ImageDraw, ImageFont 
+from transformers import ViTForImageClassification, ViTImageProcessor
+from PIL import Image, ImageDraw, ImageFont
 import io
 import torch
 from peft import PeftModel
@@ -28,41 +28,50 @@ import numpy as np
 import base64
 import psutil
 
-# New imports for DistilGPT2 (from your snippet)
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
 
-
-# Load environment variables from .env file
+# Load .env if exists (safe for local dev, ignored in HF Spaces)
 load_dotenv()
 
-# SMTP configuration
+# --------------------------
+# ENVIRONMENT VARIABLES SAFE HANDLING
+# --------------------------
+
+# SMTP config (optional on Spaces)
 SMTP_HOST = os.getenv("SMTP_HOST")
-SMTP_PORT = int(os.getenv("SMTP_PORT"))
+SMTP_PORT = os.getenv("SMTP_PORT")
 SMTP_USERNAME = os.getenv("SMTP_USERNAME")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 
+# Convert port safely
+if SMTP_PORT:
+    SMTP_PORT = int(SMTP_PORT)
+else:
+    SMTP_PORT = None  # prevents crash
+
+# MongoDB URI required
 MONGO_URI = os.getenv("MONGO_URI")
 if not MONGO_URI:
-    raise ValueError("MONGO_URI environment variable is not set. Please configure it in the .env file.")
+    raise ValueError("❌ MONGO_URI is missing. Set it in Spaces Settings → Variables & Secrets.")
 
-# Logging setup
+# --------------------------
+# LOGGING
+# --------------------------
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-# Add CORS middleware
+# CORS allowed origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",      # Allow this origin (used by the browser)
-        "http://127.0.0.1:3000"      # Also allow this for consistency
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all methods (GET, POST, DELETE, etc.)
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
+
 # MongoDB connection
 try:
     client = MongoClient(MONGO_URI)
@@ -79,7 +88,7 @@ print(f"Using device: {device}")
 
 # Load YOLOv8 model
 try:
-    yolo_model_path = "yolo_fine_tuned.pt"
+    yolo_model_path = "./models/yolo_fine_tuned.pt"
     logger.debug(f"Attempting to load YOLOv8 model from {yolo_model_path}")
     yolo_model = YOLO(yolo_model_path)
     logger.info("YOLOv8 model loaded successfully")
@@ -91,7 +100,8 @@ except Exception as e:
 
 # Load ViT model and processor from direct path
 try:
-    vit_model_path = r"C:/Users/A Praneeth/Desktop/crime_detection_model"  # Directory with adapter weights
+    vit_model_path = "./models/vitadapter"
+  # Directory with adapter weights
     # Load the base ViT model
     vit_model = ViTForImageClassification.from_pretrained(
         "google/vit-base-patch16-224",
@@ -235,6 +245,11 @@ def calculate_age(dob: str) -> int:
     
     # Function to send email
 async def send_email(to_email: str, otp: str):
+    # disable email sending when SMTP not configured
+    if not SMTP_HOST or not SMTP_PORT:
+        logger.warning(f"SMTP disabled. Skipping email send to {to_email}")
+        return {"message": "Email sending disabled on server"}
+
     try:
         # Create the email message
         subject = "Your OTP for Verification"
@@ -262,6 +277,11 @@ async def send_email(to_email: str, otp: str):
 @app.get("/welcome")
 async def welcome_message():
     return {"message": "Welcome to SceneSolver - AI-Powered Crime Detection"}
+
+@app.get("/")
+async def health():
+    return {"status": "ok"}
+
 
 @app.post("/register")
 async def register_user(user: UserRegister):
