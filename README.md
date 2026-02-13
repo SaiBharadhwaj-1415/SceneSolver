@@ -1,3 +1,4 @@
+Live Demo: https://scene-solver-eight.vercel.app/
 # SceneSolver
 
 **One-line:** Crime scene analysis app that detects and classifies harmful objects in images & video using Vision Transformer + YOLOv8.
