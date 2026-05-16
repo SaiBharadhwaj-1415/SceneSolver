@@ -1,5 +1,5 @@
 {
-  "alpha_pattern": {},
+  "alpha_pattern":{},
   "auto_mapping": {
     "base_model_class": "ViTForImageClassification",
     "parent_library": "transformers.models.vit.modeling_vit"
