@@ -1,5 +1,5 @@
 Live Demo: https://scene-solver-eight.vercel.app/
-# SceneSolver
+#SceneSolver
 
 **One-line:** Crime scene analysis app that detects and classifies harmful objects in images & video using Vision Transformer + YOLOv8.
 
@@ -10,7 +10,7 @@ Live Demo: https://scene-solver-eight.vercel.app/
 - Harmful object detection with YOLOv8 (bounding boxes).
 - Frame-level context analysis with Vision Transformer.
 - Dashboard with authentication, file upload and results view.
-- Stores cases/predictions in MongoDB.
+- Stores cases/predictions in MongoDB and also their email and queries.
 
 ---
 
